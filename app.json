@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Sunday School",
+    "slug": "sunday-school-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/image.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/image.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A90D9"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sundayschool.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/image.png",
+        "backgroundColor": "#4A90D9"
+      },
+      "package": "com.sundayschool.app"
+    }
+  }
+}
