@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { COLORS } from '../utils/constants';
 
@@ -69,7 +69,7 @@ const MainNavigator = () => (
       options={{ 
         tabBarLabel: 'Home',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="home" color={color} size={size} />
+          <Ionicons name="home" color={color} size={size} />
         ),
       }} 
     />
@@ -80,7 +80,7 @@ const MainNavigator = () => (
         headerShown: false, 
         tabBarLabel: 'Attendance',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="check-circle" color={color} size={size} />
+          <Ionicons name="checkmark-circle" color={color} size={size} />
         ),
       }} 
     />
@@ -90,7 +90,7 @@ const MainNavigator = () => (
       options={{ 
         tabBarLabel: 'Lessons',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="book-open-variant" color={color} size={size} />
+          <Ionicons name="book" color={color} size={size} />
         ),
       }} 
     />
@@ -100,7 +100,7 @@ const MainNavigator = () => (
       options={{ 
         tabBarLabel: 'Calendar',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="calendar" color={color} size={size} />
+          <Ionicons name="calendar" color={color} size={size} />
         ),
       }} 
     />
@@ -111,7 +111,7 @@ const MainNavigator = () => (
         headerShown: false, 
         tabBarLabel: 'More',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="dots-horizontal" color={color} size={size} />
+          <Ionicons name="ellipsis-horizontal" color={color} size={size} />
         ),
       }} 
     />
