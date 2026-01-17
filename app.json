@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#4A90D9"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sundayschool.app"
@@ -22,6 +24,11 @@
         "backgroundColor": "#4A90D9"
       },
       "package": "com.sundayschool.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b156c0e4-42e4-41c1-b08d-421598a6fbc0"
+      }
     }
   }
 }
