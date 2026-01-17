@@ -16,10 +16,10 @@ const theme = {
 };
 
 export default function App() {
-  const { loadUsers } = useAuthStore();
+  const { loadUser } = useAuthStore();
 
   useEffect(() => {
-    loadUsers();
+    loadUser();
   }, []);
 
   return (

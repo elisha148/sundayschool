@@ -1,14 +1,13 @@
 import { create } from 'zustand';
 import { Event } from '../types';
-import { StorageService } from '../services/storage';
-import { STORAGE_KEYS } from '../utils/constants';
-import { generateId } from '../utils/helpers';
+import { EventsAPI } from '../services/api';
 
 interface EventState {
   events: Event[];
   isLoading: boolean;
+  error: string | null;
   loadEvents: () => Promise<void>;
-  addEvent: (event: Omit<Event, 'id'>) => Promise<Event>;
+  addEvent: (event: Omit<Event, 'id'>) => Promise<Event | null>;
   updateEvent: (id: string, updates: Partial<Event>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   getUpcomingEvents: () => Event[];
@@ -18,36 +17,48 @@ interface EventState {
 export const useEventStore = create<EventState>((set, get) => ({
   events: [],
   isLoading: true,
+  error: null,
 
   loadEvents: async () => {
-    const events = await StorageService.get<Event[]>(STORAGE_KEYS.EVENTS);
-    set({ events: events || [], isLoading: false });
+    try {
+      set({ isLoading: true, error: null });
+      const events = await EventsAPI.getAll();
+      const mapped = events.map((e: any) => ({ ...e, id: e._id || e.id }));
+      set({ events: mapped, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+    }
   },
 
   addEvent: async (eventData) => {
-    const newEvent: Event = {
-      ...eventData,
-      id: generateId(),
-    };
-    const { events } = get();
-    const updated = [...events, newEvent];
-    await StorageService.set(STORAGE_KEYS.EVENTS, updated);
-    set({ events: updated });
-    return newEvent;
+    try {
+      const newEvent = await EventsAPI.create(eventData);
+      const mapped = { ...newEvent, id: newEvent._id || newEvent.id };
+      set({ events: [...get().events, mapped] });
+      return mapped;
+    } catch (error: any) {
+      set({ error: error.message });
+      return null;
+    }
   },
 
   updateEvent: async (id, updates) => {
-    const { events } = get();
-    const updated = events.map(e => e.id === id ? { ...e, ...updates } : e);
-    await StorageService.set(STORAGE_KEYS.EVENTS, updated);
-    set({ events: updated });
+    try {
+      const updated = await EventsAPI.update(id, updates);
+      const mapped = { ...updated, id: updated._id || updated.id };
+      set({ events: get().events.map(e => e.id === id ? mapped : e) });
+    } catch (error: any) {
+      set({ error: error.message });
+    }
   },
 
   deleteEvent: async (id) => {
-    const { events } = get();
-    const updated = events.filter(e => e.id !== id);
-    await StorageService.set(STORAGE_KEYS.EVENTS, updated);
-    set({ events: updated });
+    try {
+      await EventsAPI.delete(id);
+      set({ events: get().events.filter(e => e.id !== id) });
+    } catch (error: any) {
+      set({ error: error.message });
+    }
   },
 
   getUpcomingEvents: () => {

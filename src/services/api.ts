@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Change this to your backend URL when deployed
-const API_URL = 'http://localhost:3000/api';
+// Production API URL
+const API_URL = 'https://sunday-school-api-eobh.onrender.com/api';
 
 // Token storage
 const TOKEN_KEY = '@sundayschool/token';

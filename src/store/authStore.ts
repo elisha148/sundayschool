@@ -1,62 +1,70 @@
 import { create } from 'zustand';
 import { User, UserRole } from '../types';
+import { AuthAPI, setToken, clearToken, getToken } from '../services/api';
 import { StorageService } from '../services/storage';
 import { STORAGE_KEYS } from '../utils/constants';
-import { generateId } from '../utils/helpers';
 
 interface AuthState {
   user: User | null;
-  users: User[];
   isLoading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
-  loadUsers: () => Promise<void>;
+  loadUser: () => Promise<void>;
+  clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  users: [],
   isLoading: true,
+  error: null,
 
-  loadUsers: async () => {
-    const users = await StorageService.get<User[]>(STORAGE_KEYS.USERS);
-    const currentUser = await StorageService.get<User>(STORAGE_KEYS.CURRENT_USER);
-    set({ users: users || [], user: currentUser, isLoading: false });
+  loadUser: async () => {
+    try {
+      const token = await getToken();
+      if (token) {
+        const { user } = await AuthAPI.getMe();
+        set({ user: { ...user, id: user._id || user.id }, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
+    } catch (error) {
+      await clearToken();
+      set({ user: null, isLoading: false });
+    }
   },
 
-  login: async (email: string, _password: string) => {
-    const { users } = get();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (user) {
-      await StorageService.set(STORAGE_KEYS.CURRENT_USER, user);
-      set({ user });
+  login: async (email: string, password: string) => {
+    try {
+      set({ error: null });
+      const { user, token } = await AuthAPI.login(email, password);
+      await setToken(token);
+      set({ user: { ...user, id: user._id || user.id } });
       return true;
+    } catch (error: any) {
+      set({ error: error.message || 'Login failed' });
+      return false;
     }
-    return false;
   },
 
   logout: async () => {
-    await StorageService.remove(STORAGE_KEYS.CURRENT_USER);
+    await clearToken();
     set({ user: null });
   },
 
-  register: async (name: string, email: string, _password: string, role: UserRole) => {
-    const { users } = get();
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+  register: async (name: string, email: string, password: string, role: UserRole) => {
+    try {
+      set({ error: null });
+      const { user, token } = await AuthAPI.register(name, email, password, role);
+      await setToken(token);
+      set({ user: { ...user, id: user._id || user.id } });
+      return true;
+    } catch (error: any) {
+      set({ error: error.message || 'Registration failed' });
       return false;
     }
-    const newUser: User = {
-      id: generateId(),
-      name,
-      email,
-      role,
-      createdAt: new Date().toISOString(),
-    };
-    const updatedUsers = [...users, newUser];
-    await StorageService.set(STORAGE_KEYS.USERS, updatedUsers);
-    await StorageService.set(STORAGE_KEYS.CURRENT_USER, newUser);
-    set({ users: updatedUsers, user: newUser });
-    return true;
   },
+
+  clearError: () => set({ error: null }),
 }));

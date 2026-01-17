@@ -1,14 +1,13 @@
 import { create } from 'zustand';
 import { Class } from '../types';
-import { StorageService } from '../services/storage';
-import { STORAGE_KEYS } from '../utils/constants';
-import { generateId } from '../utils/helpers';
+import { ClassesAPI } from '../services/api';
 
 interface ClassState {
   classes: Class[];
   isLoading: boolean;
+  error: string | null;
   loadClasses: () => Promise<void>;
-  addClass: (classData: Omit<Class, 'id'>) => Promise<Class>;
+  addClass: (classData: Omit<Class, 'id'>) => Promise<Class | null>;
   updateClass: (id: string, updates: Partial<Class>) => Promise<void>;
   deleteClass: (id: string) => Promise<void>;
   getClassesByTeacher: (teacherId: string) => Class[];
@@ -17,39 +16,51 @@ interface ClassState {
 export const useClassStore = create<ClassState>((set, get) => ({
   classes: [],
   isLoading: true,
+  error: null,
 
   loadClasses: async () => {
-    const classes = await StorageService.get<Class[]>(STORAGE_KEYS.CLASSES);
-    set({ classes: classes || [], isLoading: false });
+    try {
+      set({ isLoading: true, error: null });
+      const classes = await ClassesAPI.getAll();
+      const mapped = classes.map((c: any) => ({ ...c, id: c._id || c.id }));
+      set({ classes: mapped, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+    }
   },
 
   addClass: async (classData) => {
-    const newClass: Class = {
-      ...classData,
-      id: generateId(),
-    };
-    const { classes } = get();
-    const updated = [...classes, newClass];
-    await StorageService.set(STORAGE_KEYS.CLASSES, updated);
-    set({ classes: updated });
-    return newClass;
+    try {
+      const newClass = await ClassesAPI.create(classData);
+      const mapped = { ...newClass, id: newClass._id || newClass.id };
+      set({ classes: [...get().classes, mapped] });
+      return mapped;
+    } catch (error: any) {
+      set({ error: error.message });
+      return null;
+    }
   },
 
   updateClass: async (id, updates) => {
-    const { classes } = get();
-    const updated = classes.map(c => c.id === id ? { ...c, ...updates } : c);
-    await StorageService.set(STORAGE_KEYS.CLASSES, updated);
-    set({ classes: updated });
+    try {
+      const updated = await ClassesAPI.update(id, updates);
+      const mapped = { ...updated, id: updated._id || updated.id };
+      set({ classes: get().classes.map(c => c.id === id ? mapped : c) });
+    } catch (error: any) {
+      set({ error: error.message });
+    }
   },
 
   deleteClass: async (id) => {
-    const { classes } = get();
-    const updated = classes.filter(c => c.id !== id);
-    await StorageService.set(STORAGE_KEYS.CLASSES, updated);
-    set({ classes: updated });
+    try {
+      await ClassesAPI.delete(id);
+      set({ classes: get().classes.filter(c => c.id !== id) });
+    } catch (error: any) {
+      set({ error: error.message });
+    }
   },
 
   getClassesByTeacher: (teacherId) => {
-    return get().classes.filter(c => c.teacherIds.includes(teacherId));
+    return get().classes.filter(c => c.teacherIds?.includes(teacherId));
   },
 }));
