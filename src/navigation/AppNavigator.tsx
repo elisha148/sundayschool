@@ -1,8 +1,8 @@
 import React from 'react';
+import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { COLORS } from '../utils/constants';
 
@@ -54,13 +54,17 @@ const MoreNavigator = () => (
   </MoreStack.Navigator>
 );
 
+const TabIcon = ({ emoji, focused }: { emoji: string; focused: boolean }) => (
+  <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.6 }}>{emoji}</Text>
+);
+
 const MainNavigator = () => (
   <Tab.Navigator
     screenOptions={{
       tabBarActiveTintColor: COLORS.primary,
       tabBarInactiveTintColor: COLORS.textSecondary,
       tabBarStyle: { paddingBottom: 5, height: 60 },
-      tabBarLabelStyle: { fontSize: 12 },
+      tabBarLabelStyle: { fontSize: 11 },
     }}
   >
     <Tab.Screen 
@@ -68,9 +72,7 @@ const MainNavigator = () => (
       component={HomeScreen} 
       options={{ 
         tabBarLabel: 'Home',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="home" color={color} size={size} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
       }} 
     />
     <Tab.Screen 
@@ -79,9 +81,7 @@ const MainNavigator = () => (
       options={{ 
         headerShown: false, 
         tabBarLabel: 'Attendance',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="checkmark-circle" color={color} size={size} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon emoji="✅" focused={focused} />,
       }} 
     />
     <Tab.Screen 
@@ -89,9 +89,7 @@ const MainNavigator = () => (
       component={LessonsScreen} 
       options={{ 
         tabBarLabel: 'Lessons',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="book" color={color} size={size} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
       }} 
     />
     <Tab.Screen 
@@ -99,9 +97,7 @@ const MainNavigator = () => (
       component={CalendarScreen} 
       options={{ 
         tabBarLabel: 'Calendar',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="calendar" color={color} size={size} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} />,
       }} 
     />
     <Tab.Screen 
@@ -110,9 +106,7 @@ const MainNavigator = () => (
       options={{ 
         headerShown: false, 
         tabBarLabel: 'More',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="ellipsis-horizontal" color={color} size={size} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} />,
       }} 
     />
   </Tab.Navigator>
